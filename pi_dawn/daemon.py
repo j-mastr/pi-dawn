@@ -1,5 +1,7 @@
 import signal
 import datetime
+import threading
+import time
 
 from pi_dawn import app
 from pi_dawn import comm
@@ -18,21 +20,16 @@ def clear_screen(led_screen):
     led_screen.draw_surface(surface)
 
 
-def configure_led_screen(state, alarms, led_screen, sunrise_alarm):
-    surface = led_screen.make_surface()
-
+def configure_surface(state, surface, sunrise_alarm):
     if state.light_on:
         surface.fill(255, 255, 255)
     else:
-        active_alarm, alarm_pos = find_active_alarm(alarms)
-        if active_alarm is None:
+        if state.active_alarm is -1:
             surface.fill(0, 0, 0)
-            state.active_alarm = -1
         else:
-            state.active_alarm = active_alarm.id
-            sunrise_alarm.draw(surface, alarm_pos)
-
-    led_screen.draw_surface(surface)
+            sunrise_alarm.draw(surface, state.alarm_pos)
+    
+    return surface
 
 
 def reschedule_alarms(alarms):
@@ -61,26 +58,115 @@ def find_active_alarm(alarms):
             return alarm, diff / app.config['ALARM_POST_DURATION']
     return None, 0
 
+def set_alarm_pos(state, alarms):
+    active_alarm, alarm_pos = find_active_alarm(alarms)
+    if active_alarm is None:
+        state.active_alarm = -1
+        state.alarm_pos = 0
+    else:
+        state.active_alarm = active_alarm.id
+        state.alarm_pos = alarm_pos
+
+
+class StoppeableThread (threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        
+        self.stopRequested = False
+        self.stopped = False
+        self.threadLock = threading.Lock() # Using the lock to block until stopped
+
+    def run(self):
+        try:
+            self.threadLock.acquire()
+            while not self.stopRequested:
+                self.execute()
+        except Exception as e:
+            raise e
+        finally:
+            self.stopped = True
+            self.threadLock.release()
+    
+    def execute(self):
+        pass
+
+    def onStop(self):
+        pass
+    
+    # Blocks until threadLock is released
+    def stop(self):
+        if not self.stopped:
+            self.stopRequested = True
+            self.onStop()
+            self.wait()
+
+    def wait(self):
+        if self.stopped:
+            return
+
+        self.threadLock.acquire()
+        self.threadLock.release()
+
+class Redraw (StoppeableThread):
+    def __init__(self, state, led_screen):
+        StoppeableThread.__init__(self)
+
+        self.state = state
+        self.led_screen = led_screen
+        self.sunrise_alarm = graphics.Sunrise(led_screen)
+
+    def execute(self):
+        with app.app_context():
+            surface = self.led_screen.make_surface()
+            configure_surface(self.state, surface, self.sunrise_alarm)
+            self.led_screen.draw_surface(surface)
+    
+    # Blocks until threadLock is released
+    def onStop(self):
+        self.led_screen.reset()
+
+
+class Schedule (StoppeableThread):
+    def __init__(self, state):
+        StoppeableThread.__init__(self)
+
+        with app.app_context():
+            self.state = state
+            self.alarms = model.Alarm.query.order_by(model.Alarm.time).all()
+
+    def execute(self):
+        with app.app_context():
+            set_alarm_pos(self.state, self.alarms)
+            reschedule_alarms(self.alarms)
+            comm.set_state(app, self.state)
+
+    def reload(self):
+        with app.app_context():
+            model.db.session.rollback()
+            self.alarms = model.Alarm.query.order_by(model.Alarm.time).all()
+
 
 def main():
-    with app.app_context():
-        signal.signal(signal.SIGINT, shutdown)
-        signal.signal(signal.SIGTERM, shutdown)
-        state = comm.State()
-        led_screen = Screen.Screen(width=10, height=32, hardware=Wire.wired)
-        sunrise_alarm = graphics.Sunrise(led_screen)
-        alarms = model.Alarm.query.order_by(model.Alarm.time).all()
+    signal.signal(signal.SIGINT, shutdown)
+    signal.signal(signal.SIGTERM, shutdown)
+    state = comm.State()
+    led_screen = Screen.Screen(width=10, height=32, hardware=Wire.wired)
 
-        while True:
-            msg = comm.receive_message(app, timeout=1)
-            if isinstance(msg, comm.StopMessage):
-                clear_screen(led_screen)
-                break
-            elif isinstance(msg, comm.SetLightStateMessage):
-                state.light_on = msg.on
-            elif isinstance(msg, comm.ReloadAlarmsMessage):
-                model.db.session.rollback()
-                alarms = model.Alarm.query.order_by(model.Alarm.time).all()
-            configure_led_screen(state, alarms, led_screen, sunrise_alarm)
-            reschedule_alarms(alarms)
-            comm.set_state(app, state)
+    redrawThread = Redraw( state, led_screen )
+    scheduleThread = Schedule( state )
+    redrawThread.start()
+    scheduleThread.start()
+
+    while True:
+        msg = comm.receive_message(app, timeout=None)
+        led_screen.reset()
+        if isinstance(msg, comm.StopMessage):
+            break
+        elif isinstance(msg, comm.SetLightStateMessage):
+            state.light_on = msg.on
+        elif isinstance(msg, comm.ReloadAlarmsMessage):
+            scheduleThread.reload()
+
+    redrawThread.stop()
+    scheduleThread.stop()
+    clear_screen(led_screen)

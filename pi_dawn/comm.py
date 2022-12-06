@@ -28,6 +28,7 @@ class ReloadAlarmsMessage(Message):
 class State:
     light_on = attr.ib(type=bool, default=False)
     active_alarm = attr.ib(type=int, default=-1)
+    alarm_pos = attr.ib(type=int, default=0)
 
 
 def send_message(app, message):
