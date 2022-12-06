@@ -11,7 +11,7 @@ SPI_DEVICE = 0
 
 
 @attr.s(init=False)
-class LedScreen(Hardware):
+class WS2801(Hardware):
     width = attr.ib(type=int)
     height = attr.ib(type=int)
 

@@ -5,11 +5,11 @@ from pi_dawn import graphics
 from pi_dawn.hw.Hardware import Hardware
 
 @attr.s(init=False)
-class LedScreen(Hardware):
+class Pygame(Hardware):
     width = attr.ib(type=int)
     height = attr.ib(type=int)
 
-    def __init__(self, width, height, gamma_r=1, gamma_g=1, gamma_b=1):
+    def __init__(self, width, height):
         self.width = width
         self.height = height
         self.state = StateIdle(self)

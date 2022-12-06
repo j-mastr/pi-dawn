@@ -5,7 +5,7 @@ from pi_dawn import app
 from pi_dawn import comm
 from pi_dawn import graphics
 from pi_dawn import model
-from pi_dawn import hw
+from pi_dawn import Wire
 from pi_dawn import Screen
 
 def shutdown(signum, frame):
@@ -68,8 +68,7 @@ def main():
         signal.signal(signal.SIGTERM, shutdown)
         state = comm.State()
         led_screen = Screen.Screen(width=10, height=32)
-        led_screen.hardware = hw.LedScreen(width=10, height=32, gamma_r=app.config['GAMMA_R'], gamma_b=app.config['GAMMA_B'],
-                                gamma_g=app.config['GAMMA_G'])
+        led_screen.hardware = Wire.wired
         sunrise_alarm = graphics.Sunrise(led_screen)
         alarms = model.Alarm.query.order_by(model.Alarm.time).all()
 

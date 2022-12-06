@@ -1,8 +1,4 @@
-import os
+from pi_dawn.hw.Pygame import Pygame
+from pi_dawn.hw.WS2801 import WS2801
 
-if os.environ.get('DEBUG', '0') == '1':
-    from pi_dawn.hw.pygame import LedScreen
-else:
-    from pi_dawn.hw.rp import LedScreen
-
-__ALL__ = [LedScreen]
+__ALL__ = [Pygame, WS2801]
