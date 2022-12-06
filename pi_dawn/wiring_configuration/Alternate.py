@@ -3,7 +3,7 @@ from pi_dawn.wiring_configuration.WiringConfigurationDecorator import WiringConf
 
 class Alternate(WiringConfigurationDecorator):
     def __init__(self, height, hardware: Hardware = None):
-        self.hardware = hardware
+        super().__init__(hardware)
         self.height = height
 
     def set_pixel(self, screen, pixel, color):

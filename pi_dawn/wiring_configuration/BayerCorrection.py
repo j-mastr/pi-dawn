@@ -3,7 +3,7 @@ from pi_dawn.wiring_configuration.WiringConfigurationDecorator import WiringConf
 
 class BayerCorrection(WiringConfigurationDecorator):
     def __init__(self, hardware: Hardware = None):
-        self.hardware = hardware
+        super().__init__(hardware)
         self.bayer_map = self.build_bayer_map()
 
     def set_pixel(self, screen, pixel, color):

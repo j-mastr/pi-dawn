@@ -5,7 +5,7 @@ from pi_dawn.hw import Hardware
 from pi_dawn.wiring_configuration.WiringConfigurationDecorator import WiringConfigurationDecorator
 
 class Debug(WiringConfigurationDecorator):
-    def __init__(self, hardware: Hardware = None, debug: bool = os.environ.get('DEBUG', '0') == '1'):
+    def __init__(self, debug: bool = os.environ.get('DEBUG', '0') == '1', hardware: Hardware = None):
         super().__init__(hardware)
         self.debug = debug
         self.state = StateDebug(self.hardware) if debug else StateProduction(self.hardware)

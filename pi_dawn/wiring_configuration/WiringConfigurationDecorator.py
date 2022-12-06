@@ -1,6 +1,7 @@
 from pi_dawn.hw import Hardware
 
 class WiringConfigurationDecorator(Hardware):
+    # Positional/Mandatory arguments first, keyword/optional arguments last!
     def __init__(self, hardware: Hardware = None):
         self.hardware = hardware
 

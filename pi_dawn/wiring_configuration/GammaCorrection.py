@@ -1,9 +1,10 @@
 from pi_dawn.hw import Hardware
 from pi_dawn.wiring_configuration.WiringConfigurationDecorator import WiringConfigurationDecorator
+from pi_dawn import app
 
 class GammaCorrection(WiringConfigurationDecorator):
-    def __init__(self, hardware: Hardware = None, gamma_r=2, gamma_g=2, gamma_b=2):
-        self.hardware = hardware
+    def __init__(self, hardware: Hardware = None, gamma_r=app.config['GAMMA_R'], gamma_g=app.config['GAMMA_G'], gamma_b=app.config['GAMMA_B']):
+        super().__init__(hardware)
 
         self.lut_r = self.build_gamma_lut(gamma_r)
         self.lut_g = self.build_gamma_lut(gamma_g)
