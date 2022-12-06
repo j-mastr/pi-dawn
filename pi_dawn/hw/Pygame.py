@@ -13,6 +13,7 @@ class Pygame(Hardware):
         self.width = width
         self.height = height
         self.state = StateIdle(self)
+        self.pysurf = pygame.Surface((self.width, self.height), depth=32)
 
         pygame.init()
         pygame.display.set_mode((10*self.width, 10*self.height))
@@ -49,21 +50,19 @@ class StateIdle:
 class StateRefresh:
     def __init__(self, screen):
         self.screen = screen
-
-        self.pysurf = pygame.Surface((self.screen.width, self.screen.height), depth=32)
-        self.pysurf.lock()
+        self.screen.pysurf.lock()
     
     def start_refresh(self):
         raise("Already refreshing!")
     
     def refresh(self):
-        self.pysurf.unlock()
+        self.screen.pysurf.unlock()
 
         bg = pygame.display.get_surface()
-        pygame.transform.scale(self.pysurf, (bg.get_width(), bg.get_height()), bg)
+        pygame.transform.scale(self.screen.pysurf, (bg.get_width(), bg.get_height()), bg)
         pygame.display.flip()
 
         self.screen.set_state(StateIdle(self.screen))
     
     def set_pixel(self, screen, pixel, color):
-        self.pysurf.set_at(pixel, color)
+        self.screen.pysurf.set_at(pixel, color)
