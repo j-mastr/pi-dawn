@@ -30,7 +30,13 @@ class Wire:
         return self.connect(wiring_configuration.Stripe, *args, **kwargs)
 
 if os.environ.get('DEBUG', '0') == '1':
-    wired = hw.Pygame(width=10, height=32)
+    wired = Wire(hw.Pygame(width=320, height=1))
+        .stripe()
+        .alternate(32)
+        .debug(False)
+        .bayer()
+        .gamma()
+        .solder()
 else:
     wired = hw.WS2801(width=10, height=32, gamma_r=app.config['GAMMA_R'], gamma_b=app.config['GAMMA_B'],
                     gamma_g=app.config['GAMMA_G'])
