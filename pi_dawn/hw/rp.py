@@ -4,13 +4,14 @@ import Adafruit_WS2801
 import Adafruit_GPIO.SPI
 
 from pi_dawn import graphics
+from pi_dawn.hw.Hardware import Hardware
 
 SPI_PORT = 0
 SPI_DEVICE = 0
 
 
 @attr.s(init=False)
-class LedScreen:
+class LedScreen(Hardware):
     width = attr.ib(type=int)
     height = attr.ib(type=int)
 
@@ -23,23 +24,23 @@ class LedScreen:
         self.bayer_map = self.build_bayer_map()
         self.pixels = Adafruit_WS2801.WS2801Pixels(width*height, spi=Adafruit_GPIO.SPI.SpiDev(SPI_PORT, SPI_DEVICE))
 
-    def make_surface(self):
-        return graphics.Surface(self)
+    def set_pixel(self, pixel, color):
+        x, y = pixel
+        r, g, b = color
+        r, g, b = self.lut_r[r], self.lut_g[g], self.lut_b[b]
+        t = self.bayer_map[y % 2][x % 2]
+        r = max(0, min(255, round(r + t)))
+        g = max(0, min(255, round(g + t)))
+        b = max(0, min(255, round(b + t)))
 
-    def draw_surface(self, surface):
-        for x in range(self.width):
-            for y in range(self.height):
-                r, g, b = surface.get_pixel(x, y)
-                r, g, b = self.lut_r[r], self.lut_g[g], self.lut_b[b]
-                t = self.bayer_map[y % 2][x % 2]
-                r = max(0, min(255, round(r + t)))
-                g = max(0, min(255, round(g + t)))
-                b = max(0, min(255, round(b + t)))
-                if x % 2 == 0:
-                    offset = self.height - y - 1 + x * self.height
-                else:
-                    offset = y + x * self.height
-                self.pixels.set_pixel_rgb(offset, r, b, g)
+        if x % 2 == 0:
+            offset = self.height - y - 1 + x * self.height
+        else:
+            offset = y + x * self.height
+
+        self.pixels.set_pixel_rgb(offset, r, b, g)
+    
+    def refresh(self):
         self.pixels.show()
 
     @staticmethod
