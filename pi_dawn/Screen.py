@@ -10,9 +10,10 @@ class Screen:
     height = attr.ib(type=int)
     hardware = attr.ib()
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, hardware):
         self.width = width
         self.height = height
+        self.hardware = hardware
 
     def set_hardware(self, hardware):
         self.hardware = hardware
@@ -28,4 +29,7 @@ class Screen:
     def set_pixels(self, surface):
         for y in range(surface.height):
             for x in range(surface.width):
-                self.hardware.set_pixel((x,y), surface.get_pixel(x, y))
+                self.hardware.set_pixel(self, (x,y), surface.get_pixel(x, y))
+    
+    def get_dimensions(self):
+        return (self.width, self.height)

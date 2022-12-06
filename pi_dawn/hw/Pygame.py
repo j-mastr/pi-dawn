@@ -24,11 +24,14 @@ class Pygame(Hardware):
     def refresh(self):
         self.state.refresh()
 
-    def set_pixel(self, pixel, color):
-        self.state.set_pixel(pixel, color)
+    def set_pixel(self, screen, pixel, color):
+        self.state.set_pixel(screen, pixel, color)
     
     def set_state(self, state):
         self.state = state
+    
+    def get_dimensions(self):
+        return (self.width, self.height)
 
 class StateIdle:
     def __init__(self, screen):
@@ -40,7 +43,7 @@ class StateIdle:
     def refresh(self):
         raise("Not in refresh state!")
     
-    def set_pixel(self):
+    def set_pixel(self, screen, pixel, color):
         raise("Not in refresh state!")
 
 class StateRefresh:
@@ -62,5 +65,5 @@ class StateRefresh:
 
         self.screen.set_state(StateIdle(self.screen))
     
-    def set_pixel(self, pixel, color):
+    def set_pixel(self, screen, pixel, color):
         self.pysurf.set_at(pixel, color)

@@ -5,5 +5,8 @@ class Hardware:
     def refresh(self):
         pass
 
-    def set_pixel(self, pixel, color):
+    def set_pixel(self, screen, pixel, color):
         pass
+    
+    def get_dimensions(self):
+        return ()

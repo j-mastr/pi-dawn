@@ -67,8 +67,7 @@ def main():
         signal.signal(signal.SIGINT, shutdown)
         signal.signal(signal.SIGTERM, shutdown)
         state = comm.State()
-        led_screen = Screen.Screen(width=10, height=32)
-        led_screen.hardware = Wire.wired
+        led_screen = Screen.Screen(width=10, height=32, hardware=Wire.wired)
         sunrise_alarm = graphics.Sunrise(led_screen)
         alarms = model.Alarm.query.order_by(model.Alarm.time).all()
 

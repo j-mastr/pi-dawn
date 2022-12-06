@@ -24,7 +24,7 @@ class WS2801(Hardware):
         self.bayer_map = self.build_bayer_map()
         self.pixels = Adafruit_WS2801.WS2801Pixels(width*height, spi=Adafruit_GPIO.SPI.SpiDev(SPI_PORT, SPI_DEVICE))
 
-    def set_pixel(self, pixel, color):
+    def set_pixel(self, screen, pixel, color):
         x, y = pixel
         r, g, b = color
         r, g, b = self.lut_r[r], self.lut_g[g], self.lut_b[b]
