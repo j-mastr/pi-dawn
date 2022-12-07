@@ -1,3 +1,4 @@
+from pi_dawn.graphics import Color
 from pi_dawn.hw import Hardware
 
 class WiringConfigurationDecorator(Hardware):
@@ -14,7 +15,7 @@ class WiringConfigurationDecorator(Hardware):
     def refresh(self):
         self.hardware.refresh()
 
-    def set_pixel(self, screen, pixel, color):
+    def set_pixel(self, screen, pixel, color: Color):
         self.hardware.set_pixel(screen, pixel, color)
 
     def get_dimensions(self):

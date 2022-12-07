@@ -2,6 +2,7 @@ import attr
 import pygame
 
 from pi_dawn import graphics
+from pi_dawn.graphics import Color
 from pi_dawn.hw.Hardware import Hardware
 
 @attr.s(init=False)
@@ -25,7 +26,7 @@ class Pygame(Hardware):
     def refresh(self):
         self.state.refresh()
 
-    def set_pixel(self, screen, pixel, color):
+    def set_pixel(self, screen, pixel, color: Color):
         self.state.set_pixel(screen, pixel, color)
     
     def set_state(self, state):
@@ -44,7 +45,7 @@ class StateIdle:
     def refresh(self):
         raise("Not in refresh state!")
     
-    def set_pixel(self, screen, pixel, color):
+    def set_pixel(self, screen, pixel, color: Color):
         raise("Not in refresh state!")
 
 class StateRefresh:
@@ -64,5 +65,5 @@ class StateRefresh:
 
         self.screen.set_state(StateIdle(self.screen))
     
-    def set_pixel(self, screen, pixel, color):
-        self.screen.pysurf.set_at(pixel, color)
+    def set_pixel(self, screen, pixel, color: Color):
+        self.screen.pysurf.set_at(pixel, tuple(color))

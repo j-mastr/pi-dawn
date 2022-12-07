@@ -6,6 +6,20 @@ class Color:
     g = attr.ib(type=int)
     b = attr.ib(type=int)
 
+    def __iter__(self):
+        yield self.r
+        yield self.g
+        yield self.b
+
+    def __getitem__(self, key):
+        return [*self][key]
+
+    def interpolate(self, other: 'Color', factor: float):
+        factor_inverse = 1 - factor
+        interpolated = [round(color * factor + other[index] * factor_inverse) for index, color in enumerate(self)]
+
+        return Color(*interpolated)
+
 
 @attr.s
 class GradientStop:
@@ -18,23 +32,17 @@ class Surface:
     def __init__(self, screen):
         self.width = screen.width
         self.height = screen.height
-        self.data = 3 * self.width * self.height * [0]
+        self.data = self.width * self.height * [Color(0, 0, 0)]
 
     def get_pixel(self, x, y):
-        offset = 3 * (y * self.width + x)
-        r = self.data[offset]
-        g = self.data[offset+1]
-        b = self.data[offset+2]
+        offset = y * self.width + x
 
-        return r, g, b
+        return self.data[offset]
     
-    def set_pixel(self, pixel, color):
+    def set_pixel(self, pixel, color: Color):
         x, y = pixel
-        offset = 3 * (y * self.width + x)
-        r, g, b = color
-        self.data[offset] = r
-        self.data[offset + 1] = g
-        self.data[offset + 2] = b
+        offset = y * self.width + x
+        self.data[offset] = color
 
         return self
 
@@ -72,15 +80,12 @@ class Gradient(Geometry):
             pos_between_stops = (pos - lower_stop.pos) / pos_diff
             pos_between_stops_inverse = 1 - pos_between_stops
 
-            r = round(lower_stop.color.r * pos_between_stops_inverse + upper_stop.color.r * pos_between_stops)
-            g = round(lower_stop.color.g * pos_between_stops_inverse + upper_stop.color.g * pos_between_stops)
-            b = round(lower_stop.color.b * pos_between_stops_inverse + upper_stop.color.b * pos_between_stops)
-
-            surface.draw(HorizontalLine(y, (r, g, b)))
+            color = upper_stop.color.interpolate(lower_stop.color, pos_between_stops)
+            surface.draw(HorizontalLine(y, color))
 
 
 class Rectangle(Geometry):
-    def __init__(self, start, end, color):
+    def __init__(self, start, end, color: Color):
         self.start = start
         self.end = end
         self.color = color
@@ -101,7 +106,7 @@ class Rectangle(Geometry):
 
 
 class Line(Geometry):
-    def __init__(self, start, end, color):
+    def __init__(self, start, end, color: Color):
         self.start = start if start[0] <= end[0] else end
         self.end = end if start[0] <= end[0] else start
         self.color = color
@@ -122,7 +127,7 @@ class Line(Geometry):
 
 
 class HorizontalLine(Line):
-    def __init__(self, y, color):
+    def __init__(self, y, color: Color):
         super().__init__((0, y), (1, y), color)
     
     def draw(self, surface):
@@ -131,12 +136,11 @@ class HorizontalLine(Line):
 
 
 class Fill(Geometry):
-    def __init__(self, color):
+    def __init__(self, color: Color):
         self.color = color
 
     def draw(self, surface):
-        r, g, b = self.color
-        surface.data = surface.width * surface.height * [r, g, b]
+        surface.data = surface.width * surface.height * [self.color]
 
 
 @attr.s

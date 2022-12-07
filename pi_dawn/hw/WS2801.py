@@ -4,6 +4,7 @@ import Adafruit_WS2801
 import Adafruit_GPIO.SPI
 
 from pi_dawn import graphics
+from pi_dawn.graphics import Color
 from pi_dawn.hw.Hardware import Hardware
 
 SPI_PORT = 0
@@ -19,10 +20,9 @@ class WS2801(Hardware):
 
         self.pixels = Adafruit_WS2801.WS2801Pixels(length, spi=Adafruit_GPIO.SPI.SpiDev(SPI_PORT, SPI_DEVICE))
 
-    def set_pixel(self, screen, pixel, color):
+    def set_pixel(self, screen, pixel, color: Color):
         offset, y = pixel
-        r, g, b = color
-        self.pixels.set_pixel_rgb(offset, r, b, g)
+        self.pixels.set_pixel_rgb(offset, *color)
 
     def refresh(self):
         self.pixels.show()
