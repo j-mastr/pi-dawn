@@ -16,16 +16,16 @@ def shutdown(signum, frame):
 
 def clear_screen(led_screen):
     surface = led_screen.make_surface()
-    surface.fill(0, 0, 0)
+    surface.draw(graphics.Fill((0, 0, 0)))
     led_screen.draw_surface(surface)
 
 
 def configure_surface(state, surface, sunrise_alarm):
     if state.light_on:
-        surface.fill(255, 255, 255)
+        surface.draw(graphics.Fill((255, 255, 255)))
     else:
-        if state.active_alarm is -1:
-            surface.fill(0, 0, 0)
+        if state.active_alarm == -1:
+            surface.draw(graphics.Fill((0, 0, 0)))
         else:
             sunrise_alarm.draw(surface, state.alarm_pos)
     

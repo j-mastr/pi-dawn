@@ -21,7 +21,7 @@ def main():
             gradient(led_screen, surface, args.channel)
     except KeyboardInterrupt:
         pass
-    surface.fill(0, 0, 0)
+    surface.draw(graphics.Fill((0, 0, 0)))
     led_screen.draw_surface(surface)
 
 
@@ -36,19 +36,19 @@ def pulse(led_screen, surface, channel):
                 color = (0, v, 0)
             else:
                 color = (0, 0, v)
-            surface.fill(*color)
+            surface.draw(graphics.Fill(color))
             led_screen.draw_surface(surface)
             time.sleep(0.02)
 
 
 def gradient(led_screen, surface, channel):
     if channel == 'r':
-        stops = [graphics.GradientStop(0.0, 255, 0, 0), graphics.GradientStop(1.0, 7, 0, 0)]
+        stops = [graphics.GradientStop(0.0, graphics.Color(255, 0, 0)), graphics.GradientStop(1.0, graphics.Color(7, 0, 0))]
     elif channel == 'g':
-        stops = [graphics.GradientStop(0.0, 0, 255, 0), graphics.GradientStop(1.0, 0, 7, 0)]
+        stops = [graphics.GradientStop(0.0, graphics.Color(0, 255, 0)), graphics.GradientStop(1.0, graphics.Color(0, 7, 0))]
     else:
-        stops = [graphics.GradientStop(0.0, 0, 0, 255), graphics.GradientStop(1.0, 0, 0, 7)]
-    surface.draw_gradient(stops)
+        stops = [graphics.GradientStop(0.0, graphics.Color(0, 0, 255)), graphics.GradientStop(1.0, graphics.Color(0, 0, 7))]
+    surface.draw(graphics.Gradient(stops))
     led_screen.draw_surface(surface)
     while True:
         time.sleep(0.02)
