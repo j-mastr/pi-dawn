@@ -1,4 +1,5 @@
 import attr
+from typing import List
 
 from .Color import Color
 
@@ -14,7 +15,7 @@ class Gradient(Geometry):
         pos = attr.ib(type=float)
         color = attr.ib(type=Color)
 
-    def __init__(self, stops):
+    def __init__(self, stops: List[Stop]):
         self.stops = stops
 
     def draw(self, surface):

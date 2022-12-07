@@ -1,7 +1,11 @@
 import attr
+from typing import Tuple, NewType
 
 from .Color import Color
+from .Geometry import Geometry
 
+
+Pixel = NewType('Pixel', Tuple[int, int])
 
 @attr.s(init=False)
 class Surface:
@@ -15,14 +19,14 @@ class Surface:
 
         return self.data[offset]
     
-    def set_pixel(self, pixel, color: Color):
+    def set_pixel(self, pixel: Pixel, color: Color):
         x, y = pixel
         offset = y * self.width + x
         self.data[offset] = color
 
         return self
 
-    def draw(self, drawing):
+    def draw(self, drawing: Geometry):
         drawing.draw(self)
 
         return self
