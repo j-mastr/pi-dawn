@@ -26,13 +26,13 @@ class Wire:
     def alternate(self, *args, **kwargs):
         return self.connect(wiring_configuration.Alternate, *args, **kwargs)
 
-    def stripe(self, *args, **kwargs):
-        return self.connect(wiring_configuration.Stripe, *args, **kwargs)
+    def strip(self, *args, **kwargs):
+        return self.connect(wiring_configuration.Strip, *args, **kwargs)
 
 if os.environ.get('DEBUG', '0') == '1':
     device = Wire(hw.Pygame(width=10, height=32))
 else:
-    device = Wire(hw.WS2801(length=320).stripe().alternate(32))
+    device = (Wire(hw.WS2801(length=320)).strip(32).alternate())
 
 wired = (device
         .debug(False)

@@ -11,7 +11,8 @@ class Screen:
     hardware = attr.ib()
     abort = attr.ib()
 
-    def __init__(self, width, height, hardware):
+    def __init__(self, hardware):
+        width, height = hardware.get_dimensions()
         self.width = width
         self.height = height
         self.hardware = hardware

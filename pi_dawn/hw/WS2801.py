@@ -23,6 +23,9 @@ class WS2801(Hardware):
         offset, y = pixel
         r, g, b = color
         self.pixels.set_pixel_rgb(offset, r, b, g)
-    
+
     def refresh(self):
         self.pixels.show()
+
+    def get_dimensions(self):
+        return (self.length, 1)

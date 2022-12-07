@@ -150,7 +150,7 @@ def main():
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
     state = comm.State()
-    led_screen = Screen.Screen(width=10, height=32, hardware=Wire.wired)
+    led_screen = Screen.Screen(hardware=Wire.wired)
 
     redrawThread = Redraw( state, led_screen )
     scheduleThread = Schedule( state )
