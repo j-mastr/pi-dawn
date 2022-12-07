@@ -5,7 +5,7 @@ import time
 
 from pi_dawn import app
 from pi_dawn import comm
-from pi_dawn import graphics
+from pi_dawn.graphics import Geometry, Sunrise
 from pi_dawn import model
 from pi_dawn import Wire
 from pi_dawn import Screen
@@ -16,16 +16,16 @@ def shutdown(signum, frame):
 
 def clear_screen(led_screen):
     surface = led_screen.make_surface()
-    surface.draw(graphics.Fill((0, 0, 0)))
+    surface.draw(Geometry.Fill((0, 0, 0)))
     led_screen.draw_surface(surface)
 
 
 def configure_surface(state, surface, sunrise_alarm):
     if state.light_on:
-        surface.draw(graphics.Fill((255, 255, 255)))
+        surface.draw(Geometry.Fill((255, 255, 255)))
     else:
         if state.active_alarm == -1:
-            surface.draw(graphics.Fill((0, 0, 0)))
+            surface.draw(Geometry.Fill((0, 0, 0)))
         else:
             sunrise_alarm.draw(surface, state.alarm_pos)
     
@@ -113,7 +113,7 @@ class Redraw (StoppeableThread):
 
         self.state = state
         self.led_screen = led_screen
-        self.sunrise_alarm = graphics.Sunrise(led_screen)
+        self.sunrise_alarm = Sunrise(led_screen)
 
     def execute(self):
         with app.app_context():
