@@ -51,15 +51,22 @@ class Surface:
 
         return self
 
-    def interpolate(self, other, factor):
-        factor_inverse = 1 - factor
-        for i in range(len(self.data)):
-            self.data[i] = round(self.data[i] * factor + other.data[i] * factor_inverse)
-
 
 class Geometry:
     def draw(self, surface):
         pass
+
+class Transition:
+    def __init__(self, duration):
+        self.duration = duration
+    def step(self, *args, **kwargs):
+        return self.Step(self, *args, **kwargs)
+
+    class Step:
+        def __init__(self, transition):
+            self.transition = transition
+        def draw(self, surface):
+            pass
 
 class Gradient(Geometry):
     def __init__(self, stops):
@@ -143,6 +150,20 @@ class Fill(Geometry):
         surface.data = surface.width * surface.height * [self.color]
 
 
+class Blend(Transition):
+    class Step(Transition.Step):
+        def __init__(self, transition, pos, nextFrame):
+            super().__init__(transition)
+            self.pos = pos
+            self.nextFrame = nextFrame
+
+        def draw(self, surface):
+            factor = self.pos / self.transition.duration
+            factor_inverse = 1 - factor
+            for i in range(len(surface.data)):
+                surface.data[i] = surface.data[i].interpolate(self.nextFrame.data[i], factor)
+
+
 @attr.s
 class SunriseAlarmStep:
     time = attr.ib()
@@ -201,4 +222,4 @@ class Sunrise:
                 upper_key_frame = key_frame
         time_between_key_frames = (time - lower_key_frame.time) / (upper_key_frame.time - lower_key_frame.time)
         surface.data = lower_key_frame.surface.data[:]
-        surface.interpolate(upper_key_frame.surface, 1-time_between_key_frames)
+        surface.draw(Blend(1).step(1-time_between_key_frames, upper_key_frame.surface))
