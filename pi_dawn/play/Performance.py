@@ -5,6 +5,7 @@ import functools
 @attr.s
 class KeyFrame:
     time = attr.ib()
+    duration = 0
     surface = attr.ib()
 
 
@@ -35,6 +36,9 @@ class Performance:
                 active_actor = actor
 
         return Scene(active_actor.transition if active_actor else None, lower_key_frame, upper_key_frame, (time-active_actor.time)/active_actor.duration if active_actor else time)
+
+    def get_duration(self):
+        return self.key_frames[-1].duration
 
     def __str__(self):
         return "{}({})".format(__class__, self.key_frames)

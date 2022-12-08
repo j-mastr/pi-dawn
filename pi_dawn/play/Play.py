@@ -33,8 +33,7 @@ class Play(BasePlay):
             generated = act.generate(led_screen)
             for g in generated:
                 g.time = timeOffset + g.time
-                if hasattr(g, "duration"):
-                    timeOffset = g.time + g.duration
+                timeOffset = g.time + g.duration
             scenes = scenes + generated
 
         return scenes

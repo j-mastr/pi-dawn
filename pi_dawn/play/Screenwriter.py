@@ -3,9 +3,8 @@ from .WithDuration import PlayWithDuration
 from pi_dawn.graphics import Geometry, Transition
 
 class Screenwriter:
-    def __init__(self, speed = None, previous = None):
+    def __init__(self, previous = None):
         self.previous = previous
-        self.speed = speed
         self.scene = None
         self.next = None
 
@@ -15,11 +14,9 @@ class Screenwriter:
     def write(self):
         if self.previous is None:
             play = Play()
-            if self.speed is not None:
-                play = PlayWithDuration(play, self.speed)
-            return play
-        
-        play = self.previous.write()
+        else:
+            play = self.previous.write()
+
         act = self.get_act()
         if act is not None:
             play.append(act)
@@ -49,13 +46,8 @@ class Screenwriter:
     def frame(self, *args, act=StageDesign, **kwargs):
         return self.then(*args, act=act, **kwargs)
 
-    def duration(self, speed):
-        if self.previous is None:
-            self.speed = speed
-        else:
-            self.previous.duration(speed)
-
-        return self
+    def duration(self, duration):
+        return self.wrap(PlayWithDuration, duration)
     
     def replace(self, *args, act = Act, insert = False, replace = False, **kwargs):
         if len(args) == 0:
@@ -70,13 +62,23 @@ class Screenwriter:
             return self
         
         return self.chain(insert=insert, replace=replace).replace(*args, act=act, insert=insert, replace=replace, **kwargs)
-    
-    def insert_next(self):
+
+    def wrap(self, wrapper, *args, **kwargs):
+        if self.previous is None:
+            self.insert_next(instance=WrappingScreenwriter).wrap(wrapper, *args, **kwargs)
+        else:
+            self.previous.wrap(wrapper, *args, **kwargs)
+
+        return self
+
+    def insert_next(self, instance=None):
+        if instance is None:
+            instance = Screenwriter
         if self.next is None:
-            return self.get_next()
+            return self.get_next(instance)
 
         currentNext = self.next
-        self.next = Screenwriter(previous = self)
+        self.next = instance(previous = self)
         self.next.next = currentNext
         currentNext.previous = self.next
 
@@ -90,8 +92,44 @@ class Screenwriter:
         else:
             return self.get_next()
 
-    def get_next(self):
+    def get_next(self, instance=None):
+        if instance is None:
+            instance = Screenwriter
         if self.next is None:
-            Screenwriter(previous = self)
+            instance(previous = self)
 
         return self.next
+
+
+class WrappingScreenwriter(Screenwriter):
+    def __init__(self, previous = None):
+        super().__init__(previous)
+        self.wrapper = None
+
+    def write(self):
+        if self.previous is None:
+            play = Play()
+        else:
+            play = self.previous.write()
+        
+        if self.wrapper is not None:
+            wrapper, args, kwargs = self.wrapper
+
+            return wrapper(play, *args, **kwargs)
+
+        return play
+
+    def replace(self, *args, act = Act, insert = False, replace = False, **kwargs):
+        if len(args) == 0:
+            return self
+        # Do not replace current scene.
+        # Propagate to next Screenwriter right away instead.
+        return self.then(*args, act = Act, insert=insert, replace=replace, **kwargs)
+
+    def wrap(self, wrapper, *args, **kwargs):
+        if self.wrapper is None:
+            self.wrapper = (wrapper, args, kwargs)
+        else:
+            self.insert_next(instance=WrappingScreenwriter).wrap(wrapper, *args, **kwargs)
+
+        return self

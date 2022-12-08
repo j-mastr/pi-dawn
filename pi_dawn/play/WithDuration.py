@@ -18,8 +18,7 @@ class PlayWithDuration(BasePlay):
         factor =  1 / self.play.get_duration()
         for scene in scenes:
             scene.time = factor * scene.time
-            if hasattr(scene, "duration"):
-                scene.duration = factor * scene.duration
+            scene.duration = factor * scene.duration
 
         return scenes
 
@@ -34,6 +33,9 @@ class PerformanceWithDuration(Performance):
 
     def scene(self, time):
         return self.performance.scene(time/self.duration)
+
+    def get_duration(self):
+        return self.duration
 
     def __str__(self):
         return "{}({})".format(__class__, self.performance.key_frames)
