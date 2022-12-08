@@ -17,9 +17,9 @@ class PlayWithDuration(BasePlay):
         scenes = self.play.generate(led_screen)
         factor =  1 / self.play.get_duration()
         for scene in scenes:
-            scene.time = round(factor * scene.time, 1)
+            scene.time = factor * scene.time
             if hasattr(scene, "duration"):
-                scene.duration = round(factor * scene.duration, 1)
+                scene.duration = factor * scene.duration
 
         return scenes
 
