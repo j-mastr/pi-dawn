@@ -21,8 +21,8 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}/alarms.db'.format(app.instance_path)
     app.config['REDIS_QUEUE_KEY'] = 'pi_dawn_alarm_queue'
     app.config['REDIS_STATE_KEY'] = 'pi_dawn_state'
-    app.config['ALARM_PRE_DURATION'] = 60 * 30
-    app.config['ALARM_POST_DURATION'] = 60 * 15
+    app.config['ALARM_PRE_DURATION'] = 60 * 30 # TODO deprecated
+    app.config['ALARM_POST_DURATION'] = 60 * 15 # TODO deprecated
     app.config['GAMMA_R'] = 0.45
     app.config['GAMMA_G'] = 0.38
     app.config['GAMMA_B'] = 0.45

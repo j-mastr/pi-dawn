@@ -5,10 +5,11 @@ import time
 
 from pi_dawn import app
 from pi_dawn import comm
-from pi_dawn.graphics import Geometry, Sunrise
 from pi_dawn import model
 from pi_dawn import Wire
 from pi_dawn import Screen
+from pi_dawn.graphics import Geometry
+from pi_dawn.Playbook import Sunrise
 
 def shutdown(signum, frame):
     comm.send_message(app, comm.StopMessage())
@@ -27,7 +28,7 @@ def configure_surface(state, surface, sunrise_alarm):
         if state.active_alarm == -1:
             surface.draw(Geometry.Fill((0, 0, 0)))
         else:
-            sunrise_alarm.draw(surface, state.alarm_pos)
+            surface.draw(sunrise_alarm.scene(state.alarm_pos))
     
     return surface
 
@@ -51,11 +52,9 @@ def find_active_alarm(alarms):
         alarm_time = alarm.next_alarm
         if alarm_time is None:
             continue
-        diff = (now - alarm_time).total_seconds()
-        if diff < 0 and -diff < app.config['ALARM_PRE_DURATION']:
-            return alarm, diff / app.config['ALARM_PRE_DURATION']
-        elif diff > 0 and diff < app.config['ALARM_POST_DURATION']:
-            return alarm, diff / app.config['ALARM_POST_DURATION']
+        diff = (now - alarm_time).total_seconds() + app.config['ALARM_PRE_DURATION']
+        if diff > 0 and diff < (app.config['ALARM_PRE_DURATION'] + app.config['ALARM_POST_DURATION']):
+            return alarm, diff
     return None, 0
 
 def set_alarm_pos(state, alarms):
@@ -113,7 +112,7 @@ class Redraw (StoppeableThread):
 
         self.state = state
         self.led_screen = led_screen
-        self.sunrise_alarm = Sunrise(led_screen)
+        self.sunrise_alarm = Sunrise.act(led_screen)
 
     def execute(self):
         with app.app_context():

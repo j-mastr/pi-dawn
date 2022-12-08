@@ -1,7 +1,6 @@
-from . import Color, Geometry, Sunrise, Surface, Transition
+from . import Color, Geometry, Surface, Transition
 
-__ALL__ = [Color.Color, Geometry, Sunrise.Sunrise, Surface.Surface, Transition]
+__ALL__ = [Color.Color, Geometry, Surface.Surface, Transition]
 
 Color = Color.Color
-Sunrise = Sunrise.Sunrise
 Surface = Surface.Surface
