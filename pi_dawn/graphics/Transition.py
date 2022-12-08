@@ -2,8 +2,6 @@ import attr
 
 
 class Transition:
-    def __init__(self, duration):
-        self.duration = duration
     def step(self, *args, **kwargs):
         return self.Step(self, *args, **kwargs)
 
@@ -22,7 +20,7 @@ class Blend(Transition):
             self.nextFrame = nextFrame
 
         def draw(self, surface):
-            factor = self.pos / self.transition.duration
+            factor = self.pos
             factor_inverse = 1 - factor
             for i in range(len(surface.data)):
-                surface.data[i] = surface.data[i].interpolate(self.nextFrame.data[i], factor)
+                surface.data[i] = surface.data[i].interpolate(self.nextFrame.data[i], factor_inverse)

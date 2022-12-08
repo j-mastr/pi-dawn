@@ -63,4 +63,4 @@ class Sunrise:
                 upper_key_frame = key_frame
         time_between_key_frames = (time - lower_key_frame.time) / (upper_key_frame.time - lower_key_frame.time)
         surface.data = lower_key_frame.surface.data[:]
-        surface.draw(Blend(1).step(1-time_between_key_frames, upper_key_frame.surface))
+        surface.draw(Blend(1).step(time_between_key_frames, upper_key_frame.surface))

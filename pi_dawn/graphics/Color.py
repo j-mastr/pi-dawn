@@ -15,6 +15,9 @@ class Color:
         return [*self][key]
 
     def interpolate(self, other: 'Color', factor: float):
+        if factor > 1 or factor < 0:
+            raise Exception("Factor out of range!")
+
         factor_inverse = 1 - factor
         interpolated = [round(color * factor + other[index] * factor_inverse) for index, color in enumerate(self)]
 
